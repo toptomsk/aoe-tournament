@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Open Unity Deep Link</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 100px;
+            background-color: #f4f6f9;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Open Unity App</h1>
+
+    <button onclick="openUnityApp()">
+        Mở ứng dụng Unity
+    </button>
+
+    <script>
+        function openUnityApp() {
+            window.location.href = "unitydl://mylink?topic1";
+        }
+    </script>
+
+</body>
+</html>
