@@ -554,7 +554,7 @@
             2 TUẦN • KẾT THÚC 02/09/2026 • RANDOM 2 VS 2 • CHẠM 5
         </div>
         <div class="firebase-status offline" id="firebaseStatus">
-            ⚠️ Chưa cấu hình Firebase
+            Đang kết nối Firebase...
         </div>
     </div>
 </header>
@@ -803,11 +803,11 @@
         </div>
 
         <div class="firebase-config-info">
-            <strong>📋 Trạng thái Firebase:</strong> <span id="firebaseConfigStatus">Chưa cấu hình</span>
+            <strong>📋 Trạng thái Firebase:</strong> <span id="firebaseConfigStatus">Đang kết nối...</span>
             <br>
-            <strong>💡 Hướng dẫn:</strong> Mở Developer Console (F12) và copy Firebase Config vào file HTML
+            <strong>💡 Nếu không lưu được:</strong> Vào Firebase Console → Realtime Database → Rules, đặt:
             <br>
-            <em>Xem file FIREBASE_SETUP.md để hướng dẫn chi tiết</em>
+            <code style="color:#e7b85c">{ "rules": { "aoe_a1_a3": { ".read": true, ".write": true } } }</code>
         </div>
 
         <div class="admin-warning">
@@ -861,10 +861,10 @@
         <br>
 
         <div class="card">
-            <h3>💾 Sao lưu dữ liệu (Local)</h3>
+            <h3>💾 Sao lưu dữ liệu</h3>
 
             <p style="color:var(--muted)">
-                Dùng chức năng này để backup kết quả từ Firebase xuống máy
+                Xuất file JSON từ dữ liệu đang có trên Firebase
             </p>
 
             <div class="form-actions">
@@ -905,43 +905,86 @@
     // Xem file FIREBASE_SETUP.md để chi tiết
 
     const firebaseConfig = {
-      apiKey: "AIzaSyDlEASK2oxBrIFZPilx_Kq4Kh8OKOB_-1g",
-      authDomain: "fir-chat-e6c89.firebaseapp.com",
-      databaseURL: "https://fir-chat-e6c89.firebaseio.com",
-      projectId: "fir-chat-e6c89",
-      storageBucket: "fir-chat-e6c89.firebasestorage.app",
-      messagingSenderId: "1047830246297",
-      appId: "1:1047830246297:web:e09c3dd925170bb11f1908"
+        apiKey: "AIzaSyDlEASK2oxBrIFZPilx_Kq4Kh8OKOB_-1g",
+        authDomain: "fir-chat-e6c89.firebaseapp.com",
+        databaseURL: "https://fir-chat-e6c89.firebaseio.com",
+        projectId: "fir-chat-e6c89",
+        storageBucket: "fir-chat-e6c89.firebasestorage.app",
+        messagingSenderId: "1047830246297",
+        appId: "1:1047830246297:web:e09c3dd925170bb11f1908"
     };
 
-    // Kiểm tra config
+    const FIREBASE_RESULTS_PATH = "aoe_a1_a3/results";
+
     let firebaseReady = false;
     let db = null;
+    let results = {};
 
     function initFirebase() {
-        // Check nếu config chưa được thay đổi
-        if (firebaseConfig.apiKey === "YOUR_API_KEY") {
+        if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY") {
             updateFirebaseStatus(false, "Chưa cấu hình Firebase");
-            document.getElementById("firebaseConfigStatus").textContent = 
-                "❌ Chưa cấu hình (copy config vào dòng 609)";
+            document.getElementById("firebaseConfigStatus").textContent =
+                "❌ Chưa cấu hình apiKey";
+            return false;
+        }
+
+        if (!firebaseConfig.databaseURL) {
+            updateFirebaseStatus(false, "Thiếu databaseURL");
+            document.getElementById("firebaseConfigStatus").textContent =
+                "❌ Thiếu databaseURL trong config";
             return false;
         }
 
         try {
-            firebase.initializeApp(firebaseConfig);
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
             db = firebase.database();
             firebaseReady = true;
-            updateFirebaseStatus(true, "Firebase sẵn sàng");
-            document.getElementById("firebaseConfigStatus").textContent = 
-                "✅ Firebase đang hoạt động";
+            updateFirebaseStatus(true, "Đang kết nối Firebase...");
+            document.getElementById("firebaseConfigStatus").textContent =
+                "✅ Firebase đã khởi tạo";
             return true;
         } catch (error) {
             console.error("Firebase init error:", error);
             updateFirebaseStatus(false, "Lỗi kết nối Firebase");
-            document.getElementById("firebaseConfigStatus").textContent = 
+            document.getElementById("firebaseConfigStatus").textContent =
                 "❌ Lỗi: " + error.message;
             return false;
         }
+    }
+
+    function normalizeResults(raw) {
+        if (!raw || typeof raw !== "object") {
+            return {};
+        }
+
+        const normalized = {};
+        Object.entries(raw).forEach(([key, value]) => {
+            if (value && typeof value === "object") {
+                normalized[Number(key)] = value;
+            }
+        });
+        return normalized;
+    }
+
+    function serializeResults(data) {
+        const payload = {};
+        Object.entries(data).forEach(([key, value]) => {
+            payload[String(key)] = value;
+        });
+        return payload;
+    }
+
+    function getFirebaseErrorMessage(error) {
+        const code = error && error.code ? error.code : "";
+        const message = error && error.message ? error.message : "Không xác định";
+
+        if (code === "PERMISSION_DENIED") {
+            return "PERMISSION_DENIED — Rules chưa cho phép ghi. Mở Realtime Database → Rules và bật read/write cho path aoe_a1_a3.";
+        }
+
+        return message;
     }
 
     function updateFirebaseStatus(isOnline, message) {
@@ -984,48 +1027,46 @@
 
     /*
      * ==========================================
-     * STORAGE (Cloud + Local Fallback)
+     * STORAGE (Firebase only)
      * ==========================================
      */
 
-    const STORAGE_KEY = "aoe_a1_a3_results";
-    let results = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    async function saveToFirebase() {
+        if (!firebaseReady || !db) {
+            throw new Error("Firebase chưa sẵn sàng. Kiểm tra config và databaseURL.");
+        }
 
-    function saveToStorage() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(results));
+        await db.ref(FIREBASE_RESULTS_PATH).set(serializeResults(results));
+        console.log("✅ Dữ liệu đã được lưu lên Firebase");
     }
 
-    function saveToFirebase() {
+    function subscribeFirebaseResults() {
         if (!firebaseReady || !db) {
-            console.warn("Firebase not ready, saving to localStorage only");
-            saveToStorage();
             return;
         }
 
-        db.ref('results').set(results)
-            .then(() => {
-                console.log("✅ Dữ liệu đã được lưu lên Firebase");
-            })
-            .catch((error) => {
-                console.error("❌ Lỗi lưu Firebase:", error);
-                updateFirebaseStatus(false, "Lỗi lưu dữ liệu");
-            });
-    }
-
-    function loadFromFirebase() {
-        if (!firebaseReady || !db) {
-            console.warn("Firebase not ready");
-            return;
-        }
-
-        db.ref('results').on('value', (snapshot) => {
-            if (snapshot.exists()) {
-                results = snapshot.val();
-                renderAll();
-                console.log("✅ Dữ liệu được đồng bộ từ Firebase");
+        db.ref(FIREBASE_RESULTS_PATH).on("value", (snapshot) => {
+            results = normalizeResults(snapshot.val());
+            renderAll();
+            if (document.getElementById("matchSelect")) {
+                loadSelectedMatch();
             }
+            console.log("✅ Dữ liệu được đồng bộ từ Firebase");
         }, (error) => {
             console.error("❌ Lỗi tải Firebase:", error);
+            updateFirebaseStatus(false, "Lỗi đọc dữ liệu");
+            document.getElementById("firebaseConfigStatus").textContent =
+                "❌ " + getFirebaseErrorMessage(error);
+        });
+
+        db.ref(".info/connected").on("value", (snapshot) => {
+            if (snapshot.val() === true) {
+                updateFirebaseStatus(true, "Firebase Realtime — Đã kết nối");
+                document.getElementById("firebaseConfigStatus").textContent =
+                    "✅ Đã kết nối Realtime Database";
+            } else {
+                updateFirebaseStatus(false, "Firebase — Đang kết nối...");
+            }
         });
     }
 
@@ -1268,11 +1309,13 @@
         }
     }
 
-    function saveResult() {
+    async function saveResult() {
         const id = Number(document.getElementById("matchSelect").value);
         const status = document.getElementById("matchStatus").value;
         const score1Str = document.getElementById("score1").value.trim();
         const score2Str = document.getElementById("score2").value.trim();
+        const previousResult = results[id] ? { ...results[id] } : null;
+        let payload;
 
         if (status === "played") {
             if (!score1Str || !score2Str) {
@@ -1305,14 +1348,14 @@
                 return;
             }
 
-            results[id] = {
+            payload = {
                 status: status,
                 score1: score1,
                 score2: score2,
                 updatedAt: new Date().toISOString()
             };
         } else {
-            results[id] = {
+            payload = {
                 status: status,
                 score1: null,
                 score2: null,
@@ -1320,14 +1363,25 @@
             };
         }
 
-        saveToStorage();
-        saveToFirebase();
-        renderAll();
-        loadSelectedMatch();
-        alert("✅ Đã cập nhật kết quả trận đấu thành công!");
+        results[id] = payload;
+
+        try {
+            await saveToFirebase();
+            alert("✅ Đã lưu kết quả lên Firebase!");
+        } catch (error) {
+            console.error("❌ Lỗi lưu Firebase:", error);
+            if (previousResult) {
+                results[id] = previousResult;
+            } else {
+                delete results[id];
+            }
+            renderAll();
+            loadSelectedMatch();
+            alert("❌ Không lưu được lên Firebase:\n" + getFirebaseErrorMessage(error));
+        }
     }
 
-    function deleteResult() {
+    async function deleteResult() {
         const id = Number(document.getElementById("matchSelect").value);
 
         if (!results[id]) {
@@ -1339,12 +1393,19 @@
             return;
         }
 
+        const previousResult = { ...results[id] };
         delete results[id];
-        saveToStorage();
-        saveToFirebase();
-        loadSelectedMatch();
-        renderAll();
-        alert("✅ Đã xóa kết quả thành công!");
+
+        try {
+            await saveToFirebase();
+            alert("✅ Đã xóa kết quả trên Firebase!");
+        } catch (error) {
+            console.error("❌ Lỗi xóa Firebase:", error);
+            results[id] = previousResult;
+            renderAll();
+            loadSelectedMatch();
+            alert("❌ Không xóa được trên Firebase:\n" + getFirebaseErrorMessage(error));
+        }
     }
 
     /*
@@ -1415,17 +1476,24 @@
      * ==========================================
      */
 
-    function resetTournament() {
-        if (!confirm("⚠️ CẢNH BÁO!\n\nToàn bộ kết quả thi đấu sẽ bị xóa vĩnh viễn.\n\nBạn có chắc chắn muốn tiếp tục?")) {
+    async function resetTournament() {
+        if (!confirm("⚠️ CẢNH BÁO!\n\nToàn bộ kết quả thi đấu sẽ bị xóa vĩnh viễn trên Firebase.\n\nBạn có chắc chắn muốn tiếp tục?")) {
             return;
         }
 
+        const previousResults = { ...results };
         results = {};
-        saveToStorage();
-        saveToFirebase();
-        renderAll();
-        loadSelectedMatch();
-        alert("✅ Đã reset giải đấu thành công!");
+
+        try {
+            await saveToFirebase();
+            alert("✅ Đã reset giải đấu trên Firebase!");
+        } catch (error) {
+            console.error("❌ Lỗi reset Firebase:", error);
+            results = previousResults;
+            renderAll();
+            loadSelectedMatch();
+            alert("❌ Không reset được trên Firebase:\n" + getFirebaseErrorMessage(error));
+        }
     }
 
     /*
@@ -1447,17 +1515,13 @@
      * ==========================================
      */
 
-    // Khởi động Firebase
-    initFirebase();
-
-    // Load dữ liệu
-    if (firebaseReady) {
-        loadFromFirebase();
-    }
-
-    // Khởi động UI
     initMatchSelect();
-    renderAll();
+
+    if (initFirebase()) {
+        subscribeFirebaseResults();
+    } else {
+        renderAll();
+    }
 
 </script>
 
