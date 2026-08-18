@@ -901,15 +901,11 @@
     function initFirebase() {
         if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY") {
             updateFirebaseStatus(false, "Chưa cấu hình Firebase");
-            document.getElementById("firebaseConfigStatus").textContent =
-                "❌ Chưa cấu hình apiKey";
             return false;
         }
 
         if (!firebaseConfig.databaseURL) {
             updateFirebaseStatus(false, "Thiếu databaseURL");
-            document.getElementById("firebaseConfigStatus").textContent =
-                "❌ Thiếu databaseURL trong config";
             return false;
         }
 
@@ -920,14 +916,10 @@
             db = firebase.database();
             firebaseReady = true;
             updateFirebaseStatus(true, "Đang kết nối Firebase...");
-            document.getElementById("firebaseConfigStatus").textContent =
-                "✅ Firebase đã khởi tạo";
             return true;
         } catch (error) {
             console.error("Firebase init error:", error);
             updateFirebaseStatus(false, "Lỗi kết nối Firebase");
-            document.getElementById("firebaseConfigStatus").textContent =
-                "❌ Lỗi: " + error.message;
             return false;
         }
     }
@@ -1033,15 +1025,11 @@
         }, (error) => {
             console.error("❌ Lỗi tải Firebase:", error);
             updateFirebaseStatus(false, "Lỗi đọc dữ liệu");
-            document.getElementById("firebaseConfigStatus").textContent =
-                "❌ " + getFirebaseErrorMessage(error);
         });
 
         db.ref(".info/connected").on("value", (snapshot) => {
             if (snapshot.val() === true) {
                 updateFirebaseStatus(true, "Firebase Realtime — Đã kết nối");
-                document.getElementById("firebaseConfigStatus").textContent =
-                    "✅ Đã kết nối Realtime Database";
             } else {
                 updateFirebaseStatus(false, "Firebase — Đang kết nối...");
             }
