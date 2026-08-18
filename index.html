@@ -548,9 +548,6 @@
         <div class="date-info">
             2 TUẦN • KẾT THÚC 02/09/2026 • RANDOM 2 VS 2 • CHẠM 5
         </div>
-        <div class="firebase-status offline" id="firebaseStatus">
-            Đang kết nối Firebase...
-        </div>
     </div>
 </header>
 
@@ -958,14 +955,7 @@
     }
 
     function updateFirebaseStatus(isOnline, message) {
-        const status = document.getElementById("firebaseStatus");
-        if (isOnline) {
-            status.className = "firebase-status online";
-            status.textContent = "🟢 " + message;
-        } else {
-            status.className = "firebase-status offline";
-            status.textContent = "🔴 " + message;
-        }
+        
     }
 
     /*
