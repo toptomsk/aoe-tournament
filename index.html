@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giải AOE I - Cựu học sinh A1 & A3</title>
+    <title>Giải AOE I - Cựu học sinh A1 & A3 (Shared)</title>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
@@ -30,16 +30,16 @@
 
         body {
             background-image:
-        linear-gradient(
-            rgba(0, 0, 0, 0.55),
-            rgba(0, 0, 0, 0.7)
-        ),
-        url('./bg.png');
+       	    	linear-gradient(
+            		rgba(0, 0, 0, 0.55),
+            		rgba(0, 0, 0, 0.7)
+           	),
+          	url('./bg.png');
 
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
+    		background-size: cover;
+    		background-position: center;
+    		background-repeat: no-repeat;
+    		background-attachment: fixed;
             margin: 0;
             font-family: "Be Vietnam Pro", Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
@@ -91,6 +91,23 @@
         .date-info {
             margin-top: 12px;
             color: var(--muted);
+        }
+
+        .firebase-status {
+            margin-top: 8px;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .firebase-status.online {
+            color: #8bc477;
+        }
+
+        .firebase-status.offline {
+            color: #d97970;
         }
 
         /* NAV */
@@ -449,6 +466,17 @@
             margin: auto;
         }
 
+        .firebase-config-info {
+            border: 1px solid #8b6420;
+            background: #2a1b0e;
+            color: #f1cf72;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
         /* FOOTER */
 
         footer {
@@ -521,9 +549,12 @@
     <div class="container">
         <div class="eyebrow">Cựu học sinh A1 & A3</div>
         <h1>AOE I</h1>
-        <div class="subtitle">GIẢI ĐẤU AOE I</div>
+        <div class="subtitle">GIẢI ĐẤU AOE I (Shared)</div>
         <div class="date-info">
             2 TUẦN • KẾT THÚC 02/09/2026 • RANDOM 2 VS 2 • CHẠM 5
+        </div>
+        <div class="firebase-status offline" id="firebaseStatus">
+            ⚠️ Chưa cấu hình Firebase
         </div>
     </div>
 </header>
@@ -585,7 +616,7 @@
     <section id="ranking">
         <div class="section-title">
             <h2>🏆 BẢNG XẾP HẠNG</h2>
-            <p>Tự động cập nhật sau mỗi trận đấu</p>
+            <p>Tự động cập nhật sau mỗi trận đấu (Realtime)</p>
         </div>
 
         <div class="table-wrap">
@@ -621,7 +652,7 @@
     <section id="results">
         <div class="section-title">
             <h2>📜 KẾT QUẢ THI ĐẤU</h2>
-            <p>Kết quả được cập nhật theo thời gian thực trên trình duyệt</p>
+            <p>Kết quả được cập nhật theo thời gian thực trên tất cả thiết bị</p>
         </div>
 
         <div id="resultsList"></div>
@@ -768,13 +799,23 @@
     <section id="admin">
         <div class="section-title">
             <h2>⚙️ QUẢN TRỊ GIẢI ĐẤU</h2>
-            <p>Cập nhật kết quả các trận đấu</p>
+            <p>Cập nhật kết quả các trận đấu (Shared trên Firebase)</p>
+        </div>
+
+        <div class="firebase-config-info">
+            <strong>📋 Trạng thái Firebase:</strong> <span id="firebaseConfigStatus">Chưa cấu hình</span>
+            <br>
+            <strong>💡 Hướng dẫn:</strong> Mở Developer Console (F12) và copy Firebase Config vào file HTML
+            <br>
+            <em>Xem file FIREBASE_SETUP.md để hướng dẫn chi tiết</em>
         </div>
 
         <div class="admin-warning">
-            ⚠️ Dữ liệu được lưu trong trình duyệt bằng LocalStorage.
-            Nếu đổi máy hoặc xóa dữ liệu trình duyệt, hãy dùng chức năng
-            <strong>Xuất dữ liệu</strong> để backup.
+            ✅ Dữ liệu được lưu trên Firebase Realtime Database
+            <br>
+            ✅ Mọi người truy cập vào sẽ thấy kết quả cập nhật tức thời
+            <br>
+            ⚠️ Không cần lo mất dữ liệu khi đổi máy hoặc xóa browser cache
         </div>
 
         <div class="card">
@@ -808,7 +849,7 @@
 
             <div class="form-actions">
                 <button class="btn" onclick="saveResult()">
-                    💾 Lưu kết quả
+                    💾 Lưu kết quả (Firebase)
                 </button>
 
                 <button class="btn btn-danger" onclick="deleteResult()">
@@ -820,10 +861,10 @@
         <br>
 
         <div class="card">
-            <h3>💾 Sao lưu dữ liệu</h3>
+            <h3>💾 Sao lưu dữ liệu (Local)</h3>
 
             <p style="color:var(--muted)">
-                Dùng chức năng này để backup toàn bộ kết quả giải đấu.
+                Dùng chức năng này để backup kết quả từ Firebase xuống máy
             </p>
 
             <div class="form-actions">
@@ -831,13 +872,8 @@
                     ⬇️ Xuất dữ liệu
                 </button>
 
-                <label class="btn">
-                    ⬆️ Nhập dữ liệu
-                    <input type="file" id="importFile" accept=".json" hidden onchange="importData(event)">
-                </label>
-
                 <button class="btn btn-danger" onclick="resetTournament()">
-                    ⚠️ Reset giải đấu
+                    ⚠️ Reset giải đấu (Firebase)
                 </button>
             </div>
         </div>
@@ -849,9 +885,75 @@
     AOE I — Cựu học sinh A1 & A3
     <br>
     Chơi hết mình — Kết tình A1 A3
+    <br>
+    🔥 Powered by Firebase Realtime Database
 </footer>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
+
 <script>
+
+    /*
+     * ==========================================
+     * FIREBASE CONFIG - THAY ĐỔI CÁI NÀY!
+     * ==========================================
+     */
+
+    // ⚠️ HƯỚNG DẪN: Thay thế firebaseConfig dưới đây bằng config của bạn
+    // Lấy từ Firebase Console > Project Settings
+    // Xem file FIREBASE_SETUP.md để chi tiết
+
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        databaseURL: "YOUR_DATABASE_URL",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
+
+    // Kiểm tra config
+    let firebaseReady = false;
+    let db = null;
+
+    function initFirebase() {
+        // Check nếu config chưa được thay đổi
+        if (firebaseConfig.apiKey === "YOUR_API_KEY") {
+            updateFirebaseStatus(false, "Chưa cấu hình Firebase");
+            document.getElementById("firebaseConfigStatus").textContent = 
+                "❌ Chưa cấu hình (copy config vào dòng 609)";
+            return false;
+        }
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            firebaseReady = true;
+            updateFirebaseStatus(true, "Firebase sẵn sàng");
+            document.getElementById("firebaseConfigStatus").textContent = 
+                "✅ Firebase đang hoạt động";
+            return true;
+        } catch (error) {
+            console.error("Firebase init error:", error);
+            updateFirebaseStatus(false, "Lỗi kết nối Firebase");
+            document.getElementById("firebaseConfigStatus").textContent = 
+                "❌ Lỗi: " + error.message;
+            return false;
+        }
+    }
+
+    function updateFirebaseStatus(isOnline, message) {
+        const status = document.getElementById("firebaseStatus");
+        if (isOnline) {
+            status.className = "firebase-status online";
+            status.textContent = "🟢 " + message;
+        } else {
+            status.className = "firebase-status offline";
+            status.textContent = "🔴 " + message;
+        }
+    }
 
     /*
      * ==========================================
@@ -882,15 +984,49 @@
 
     /*
      * ==========================================
-     * STORAGE
+     * STORAGE (Cloud + Local Fallback)
      * ==========================================
      */
 
     const STORAGE_KEY = "aoe_a1_a3_results";
     let results = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
 
-    function saveStorage() {
+    function saveToStorage() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(results));
+    }
+
+    function saveToFirebase() {
+        if (!firebaseReady || !db) {
+            console.warn("Firebase not ready, saving to localStorage only");
+            saveToStorage();
+            return;
+        }
+
+        db.ref('results').set(results)
+            .then(() => {
+                console.log("✅ Dữ liệu đã được lưu lên Firebase");
+            })
+            .catch((error) => {
+                console.error("❌ Lỗi lưu Firebase:", error);
+                updateFirebaseStatus(false, "Lỗi lưu dữ liệu");
+            });
+    }
+
+    function loadFromFirebase() {
+        if (!firebaseReady || !db) {
+            console.warn("Firebase not ready");
+            return;
+        }
+
+        db.ref('results').on('value', (snapshot) => {
+            if (snapshot.exists()) {
+                results = snapshot.val();
+                renderAll();
+                console.log("✅ Dữ liệu được đồng bộ từ Firebase");
+            }
+        }, (error) => {
+            console.error("❌ Lỗi tải Firebase:", error);
+        });
     }
 
     /*
@@ -1138,7 +1274,6 @@
         const score1Str = document.getElementById("score1").value.trim();
         const score2Str = document.getElementById("score2").value.trim();
 
-        // FIX 1: Validate input is not empty and is a number
         if (status === "played") {
             if (!score1Str || !score2Str) {
                 alert("❌ Vui lòng nhập tỷ số cho cả hai đội.");
@@ -1148,36 +1283,28 @@
             const score1 = Number(score1Str);
             const score2 = Number(score2Str);
 
-            // FIX 2: Check if inputs are valid numbers
             if (isNaN(score1) || isNaN(score2)) {
                 alert("❌ Tỷ số phải là số hợp lệ.");
                 return;
             }
 
-            // FIX 3: Check if score is in valid range
             if (score1 < 0 || score2 < 0 || score1 > 5 || score2 > 5) {
                 alert("❌ Tỷ số phải từ 0 đến 5 (Chạm 5 = một đội thắng 5 game).");
                 return;
             }
 
-            // FIX 4: MOST IMPORTANT - Validate "Best of 5" rule
-            // Một trong hai đội PHẢI thắng 5 game (hoặc ít nhất một đối thủ phải thua hoàn toàn)
             if (score1 === score2) {
                 alert("❌ Lỗi quy tắc Chạm 5: Không thể hòa! Một trong hai đội phải thắng.");
                 return;
             }
 
-            // Ensure one team has 5 points (or match is incomplete)
             const maxScore = Math.max(score1, score2);
-            const minScore = Math.min(score1, score2);
 
-            // For a best of 5 match, winner needs 5 wins, and loser must have fewer
             if (maxScore !== 5) {
-                alert(`❌ Lỗi quy tắc Chạm 5: Đội thắng phải có 5 game! (Hiện tại: ${maxScore} - ${minScore})`);
+                alert(`❌ Lỗi quy tắc Chạm 5: Đội thắng phải có 5 game! (Hiện tại: ${maxScore} - ${Math.min(score1, score2)})`);
                 return;
             }
 
-            // Save the valid result
             results[id] = {
                 status: status,
                 score1: score1,
@@ -1185,7 +1312,6 @@
                 updatedAt: new Date().toISOString()
             };
         } else {
-            // For cancelled or pending status, no score needed
             results[id] = {
                 status: status,
                 score1: null,
@@ -1194,9 +1320,10 @@
             };
         }
 
-        saveStorage();
+        saveToStorage();
+        saveToFirebase();
         renderAll();
-        loadSelectedMatch(); // FIX 5: Reset form after saving
+        loadSelectedMatch();
         alert("✅ Đã cập nhật kết quả trận đấu thành công!");
     }
 
@@ -1213,7 +1340,8 @@
         }
 
         delete results[id];
-        saveStorage();
+        saveToStorage();
+        saveToFirebase();
         loadSelectedMatch();
         renderAll();
         alert("✅ Đã xóa kết quả thành công!");
@@ -1265,7 +1393,7 @@
 
     /*
      * ==========================================
-     * EXPORT / IMPORT
+     * EXPORT
      * ==========================================
      */
 
@@ -1281,26 +1409,6 @@
         alert("✅ Đã xuất dữ liệu thành công!");
     }
 
-    function importData(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const imported = JSON.parse(e.target.result);
-                results = imported;
-                saveStorage();
-                renderAll();
-                loadSelectedMatch();
-                alert("✅ Đã nhập dữ liệu thành công!");
-            } catch (err) {
-                alert("❌ File JSON không hợp lệ:\n" + err.message);
-            }
-        };
-        reader.readAsText(file);
-    }
-
     /*
      * ==========================================
      * RESET
@@ -1313,7 +1421,8 @@
         }
 
         results = {};
-        saveStorage();
+        saveToStorage();
+        saveToFirebase();
         renderAll();
         loadSelectedMatch();
         alert("✅ Đã reset giải đấu thành công!");
@@ -1338,6 +1447,15 @@
      * ==========================================
      */
 
+    // Khởi động Firebase
+    initFirebase();
+
+    // Load dữ liệu
+    if (firebaseReady) {
+        loadFromFirebase();
+    }
+
+    // Khởi động UI
     initMatchSelect();
     renderAll();
 
