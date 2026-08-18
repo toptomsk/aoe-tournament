@@ -29,14 +29,21 @@
         }
 
         body {
-            background-image: url('./bg.png');
+            background-image:
+        linear-gradient(
+            rgba(0, 0, 0, 0.55),
+            rgba(0, 0, 0, 0.7)
+        ),
+        url('./background.jpg');
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
             margin: 0;
             font-family: "Be Vietnam Pro", Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            background:
-                radial-gradient(circle at top, #3a2818 0%, transparent 35%),
-                linear-gradient(135deg, #0d0906, #1c130d 45%, #0d0906);
             color: var(--text);
             min-height: 100vh;
         }
